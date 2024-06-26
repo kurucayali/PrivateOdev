@@ -4,40 +4,29 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
-    private CardLayout cardLayout;
     private JPanel mainPanel;
 
     public MainFrame() {
-        setTitle("Turizm Acente Sistemi");
-        setSize(800, 600);
+        setTitle("Patika Turizm Acentesi");
+        setSize(800, 600);  // Ana pencerenin boyutunu ayarlama
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
 
-        // CardLayout ve ana panel oluşturuluyor
-        cardLayout = new CardLayout();
-        mainPanel = new JPanel(cardLayout);
+        initComponents();  // Bileşenleri başlatma
 
-        // Paneller oluşturuluyor ve ana panele ekleniyor
-        JPanel loginPanel = new LoginPanel(this);
-        JPanel adminPanel = new AdminPanel();
-        JPanel employeePanel = new EmployeePanel();
+        setLocationRelativeTo(null);  // Pencereyi ekranın ortasında açma
+        setVisible(true);
+    }
 
-        mainPanel.add(loginPanel, "login");
-        mainPanel.add(adminPanel, "admin");
-        mainPanel.add(employeePanel, "employee");
+    private void initComponents() {
+        mainPanel = new JPanel();
+        mainPanel.setName("mainPanel");
+        mainPanel.setLayout(new CardLayout());
 
         add(mainPanel);
     }
 
-    // Belirli bir paneli göstermek için kullanılan metot
     public void showPanel(String panelName) {
-        cardLayout.show(mainPanel, panelName);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
-            frame.setVisible(true);
-        });
+        CardLayout cl = (CardLayout) mainPanel.getLayout();
+        cl.show(mainPanel, panelName);
     }
 }
