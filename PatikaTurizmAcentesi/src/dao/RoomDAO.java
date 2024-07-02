@@ -262,4 +262,21 @@ public class RoomDAO {
         }
         return map;
     }
+
+    public double getPricePerNight(String hotelName, String roomType, String pensionType) {
+        String query = "SELECT price_per_night FROM rooms WHERE hotel_name = ? AND room_type = ? AND pension_type = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, hotelName);
+            preparedStatement.setString(2, roomType);
+            preparedStatement.setString(3, pensionType);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble("price_per_night");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
 }

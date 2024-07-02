@@ -91,6 +91,68 @@ public class MakeReservationView extends JFrame {
                 loadHotels();
             }
         });
+        comboBoxStartDay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxStartMonth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxStartYear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndDay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndMonth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndYear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxHotelName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxRoomType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxPensionType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
     }
 
     private void loadCities() {
@@ -236,4 +298,29 @@ public class MakeReservationView extends JFrame {
         textAreaReservationNote.setText("");
         textFieldTotalPrice.setText("");
     }
+    private void calculateTotalPrice() {
+        int startDay = (int) comboBoxStartDay.getSelectedItem();
+        int startMonth = (int) comboBoxStartMonth.getSelectedItem();
+        int startYear = (int) comboBoxStartYear.getSelectedItem();
+        String startDate = startYear + "-" + startMonth + "-" + startDay;
+
+        int endDay = (int) comboBoxEndDay.getSelectedItem();
+        int endMonth = (int) comboBoxEndMonth.getSelectedItem();
+        int endYear = (int) comboBoxEndYear.getSelectedItem();
+        String endDate = endYear + "-" + endMonth + "-" + endDay;
+
+        LocalDate start = LocalDate.of(startYear, startMonth, startDay);
+        LocalDate end = LocalDate.of(endYear, endMonth, endDay);
+        long nights = java.time.temporal.ChronoUnit.DAYS.between(start, end);
+
+        String selectedHotel = (String) comboBoxHotelName.getSelectedItem();
+        String selectedRoomType = (String) comboBoxRoomType.getSelectedItem();
+        String selectedPensionType = (String) comboBoxPensionType.getSelectedItem();
+
+        double pricePerNight = roomController.getPricePerNight(selectedHotel, selectedRoomType, selectedPensionType);
+        double totalPrice = pricePerNight * nights;
+
+        textFieldTotalPrice.setText(String.valueOf(totalPrice));
+    }
+
 }

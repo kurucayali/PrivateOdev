@@ -51,4 +51,8 @@ public class RoomController {
     public List<String> getHotelsByCity(String city) {
         return roomService.getHotelsByCity(city);
     }
+    public double getPricePerNight(String hotelName, String roomType, String pensionType) {
+        return roomService.getPricePerNight(hotelName, roomType, pensionType);
+    }
+
 }

@@ -51,4 +51,9 @@ public class RoomService {
     public List<String> getHotelsByCity(String city) {
         return roomDAO.getHotelsByCity(city);
     }
+
+    public double getPricePerNight(String hotelName, String roomType, String pensionType) {
+        return roomDAO.getPricePerNight(hotelName, roomType, pensionType);
+    }
+
 }
