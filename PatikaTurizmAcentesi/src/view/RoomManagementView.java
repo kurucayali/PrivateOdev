@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
@@ -41,13 +42,21 @@ public class RoomManagementView extends JFrame {
 
         // Otel isimlerini ve şehirleri combobox'a ekle
         List<Hotel> hotels = hotelController.getAllHotels();
+
         comboBoxHotelName.addItem("Hepsi");
         comboBoxCity.addItem("Hepsi");
+        ArrayList<String> cities= new ArrayList<>();
+
+
+
         for (Hotel hotel : hotels) {
             comboBoxHotelName.addItem(hotel.getName());
-            if (!comboBoxCity.getSelectedItem().equals(hotel.getCity())) {
-                comboBoxCity.addItem(hotel.getCity());
+            if (!cities.contains(hotel.getCity())) {
+                cities.add(hotel.getCity());
             }
+        }
+        for(String city: cities) {
+            comboBoxCity.addItem(city);            
         }
 
         // Oda tiplerini combobox'a ekle
