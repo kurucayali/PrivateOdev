@@ -91,9 +91,12 @@ public class AdminView extends JFrame {
                 int selectedRow = tableUsers.getSelectedRow();
                 if (selectedRow != -1) {
                     int userId = (int) tableUsers.getValueAt(selectedRow, 0);
-                    userController.deleteUser(userId);
-                    JOptionPane.showMessageDialog(panelMain, "Kullanıcı silindi!");
-                    refreshUserTable();
+                    int confirm = JOptionPane.showConfirmDialog(panelMain, "Bu kullanıcıyı silmek istediğinizden emin misiniz?", "Kullanıcı Silme", JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        userController.deleteUser(userId);
+                        JOptionPane.showMessageDialog(panelMain, "Kullanıcı silindi!");
+                        refreshUserTable();
+                    }
                 } else {
                     JOptionPane.showMessageDialog(panelMain, "Lütfen silmek istediğiniz kullanıcıyı seçin.");
                 }

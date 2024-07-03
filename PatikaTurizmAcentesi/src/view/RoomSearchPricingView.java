@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class RoomSearchPricingView extends JFrame {
         loadCities();
         initDateComboBoxes();
 
-        tableModelRooms = new DefaultTableModel(new Object[]{"Otel Adı", "Oda Tipi", "Pansiyon Tipi", "Fiyat", "Toplam Fiyat"}, 0) {
+        tableModelRooms = new DefaultTableModel(new Object[]{"Şehir", "Otel Adı", "Oda Tipi", "Pansiyon Tipi", "Fiyat", "Toplam Fiyat"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -76,6 +77,25 @@ public class RoomSearchPricingView extends JFrame {
             }
         });
 
+        buttonMakeReservation.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = tableRooms.getSelectedRow();
+                if (selectedRow != -1) {
+                    String city = (String) tableModelRooms.getValueAt(selectedRow, 0);
+                    String hotelName = (String) tableModelRooms.getValueAt(selectedRow, 1);
+                    String roomType = (String) tableModelRooms.getValueAt(selectedRow, 2);
+                    String pensionType = (String) tableModelRooms.getValueAt(selectedRow, 3);
+                    String checkInDate = comboBoxCheckInYear.getSelectedItem() + "-" + String.format("%02d", comboBoxCheckInMonth.getSelectedItem()) + "-" + String.format("%02d", comboBoxCheckInDay.getSelectedItem());
+                    String checkOutDate = comboBoxCheckOutYear.getSelectedItem() + "-" + String.format("%02d", comboBoxCheckOutMonth.getSelectedItem()) + "-" + String.format("%02d", comboBoxCheckOutDay.getSelectedItem());
+
+                    new MakeReservationView(reservationController, hotelController, roomController, city, hotelName, roomType, pensionType, checkInDate, checkOutDate).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(panelMain, "Lütfen bir oda seçin.");
+                }
+            }
+        });
+
         buttonExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,7 +114,7 @@ public class RoomSearchPricingView extends JFrame {
 
     private void loadHotels() {
         String selectedCity = (String) comboBoxSearchCity.getSelectedItem();
-        List<String> hotels = roomController.getHotelsByCity(selectedCity.equals("Hepsi") ? "" : selectedCity);
+        List<String> hotels = hotelController.getHotelsByCity(selectedCity.equals("Hepsi") ? "" : selectedCity);
         comboBoxSearchHotelName.removeAllItems();
         comboBoxSearchHotelName.addItem("Hepsi");
         for (String hotel : hotels) {
@@ -122,19 +142,20 @@ public class RoomSearchPricingView extends JFrame {
         String city = (String) comboBoxSearchCity.getSelectedItem();
         String hotelName = (String) comboBoxSearchHotelName.getSelectedItem();
 
-        List<Room> rooms = roomController.listAvailableRooms(city, hotelName);
+        List<Room> rooms = roomController.listAvailableRooms(city.equals("Hepsi") ? "" : city, hotelName.equals("Hepsi") ? "" : hotelName);
         updateRoomsTable(rooms);
     }
 
     private void updateRoomsTable(List<Room> rooms) {
-        String checkInDate = comboBoxCheckInYear.getSelectedItem() + "-" + comboBoxCheckInMonth.getSelectedItem() + "-" + comboBoxCheckInDay.getSelectedItem();
-        String checkOutDate = comboBoxCheckOutYear.getSelectedItem() + "-" + comboBoxCheckOutMonth.getSelectedItem() + "-" + comboBoxCheckOutDay.getSelectedItem();
+        String checkInDate = comboBoxCheckInYear.getSelectedItem() + "-" + String.format("%02d", comboBoxCheckInMonth.getSelectedItem()) + "-" + String.format("%02d", comboBoxCheckInDay.getSelectedItem());
+        String checkOutDate = comboBoxCheckOutYear.getSelectedItem() + "-" + String.format("%02d", comboBoxCheckOutMonth.getSelectedItem()) + "-" + String.format("%02d", comboBoxCheckOutDay.getSelectedItem());
         int nights = getNightsDifference(checkInDate, checkOutDate);
 
         tableModelRooms.setRowCount(0);
         for (Room room : rooms) {
             double totalPrice = room.getTotalPrice(nights); // Toplam fiyat hesaplama
             tableModelRooms.addRow(new Object[]{
+                    hotelController.getCityByRoomId(room.getId()),
                     room.getHotelName(),
                     room.getRoomType(),
                     room.getPensionType(),
@@ -145,8 +166,9 @@ public class RoomSearchPricingView extends JFrame {
     }
 
     private int getNightsDifference(String checkInDate, String checkOutDate) {
-        LocalDate startDate = LocalDate.parse(checkInDate);
-        LocalDate endDate = LocalDate.parse(checkOutDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startDate = LocalDate.parse(checkInDate, formatter);
+        LocalDate endDate = LocalDate.parse(checkOutDate, formatter);
         return (int) ChronoUnit.DAYS.between(startDate, endDate);
     }
 }

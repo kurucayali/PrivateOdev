@@ -75,6 +75,8 @@ Kullanıcı adı ve şifre ile giriş yaparak sisteme erişim sağlayın.
 
 
 
+
+
 ## Modüller:
 
 Otel Yönetimi, Oda Yönetimi, Rezervasyon Yönetimi ve Dönem Yönetimi modüllerini kullanarak ilgili işlemleri gerçekleştirin.

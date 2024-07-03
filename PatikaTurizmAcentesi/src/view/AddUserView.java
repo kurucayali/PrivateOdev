@@ -51,6 +51,12 @@ public class AddUserView extends JFrame {
                 String surname = textFieldSurname.getText();
                 String role = comboBoxRole.getSelectedItem().toString();
 
+                // Kullanıcı adı ve şifre kontrolü
+                if (username.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(panelMain, "Kullanıcı adı ve şifre zorunludur.", "Hata", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 if (user == null) {
                     // Yeni kullanıcı ekle
                     user = new User();

@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class MakeReservationView extends JFrame {
@@ -48,6 +49,26 @@ public class MakeReservationView extends JFrame {
     private HotelController hotelController;
     private RoomController roomController;
 
+    // Constructor for RoomSearchPricingView
+    public MakeReservationView(ReservationController reservationController, HotelController hotelController, RoomController roomController, String city, String hotelName, String roomType, String pensionType, String checkInDate, String checkOutDate) {
+        this.reservationController = reservationController;
+        this.hotelController = hotelController;
+        this.roomController = roomController;
+
+        setTitle("Rezervasyon Yap");
+        setSize(1500, 400);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        add(panelMain);
+
+        initComponents();
+        initEventHandlers();
+
+        // Set the reservation details
+        setReservationDetails(city, hotelName, roomType, pensionType, checkInDate, checkOutDate);
+    }
+
+    // Default constructor for ReservationManagementMainView
     public MakeReservationView(ReservationController reservationController, HotelController hotelController, RoomController roomController) {
         this.reservationController = reservationController;
         this.hotelController = hotelController;
@@ -220,6 +241,27 @@ public class MakeReservationView extends JFrame {
         }
     }
 
+    private void setReservationDetails(String city, String hotelName, String roomType, String pensionType, String checkInDate, String checkOutDate) {
+        comboBoxCity.setSelectedItem(city);
+        comboBoxHotelName.setSelectedItem(hotelName);
+        comboBoxRoomType.setSelectedItem(roomType);
+        comboBoxPensionType.setSelectedItem(pensionType);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate checkIn = LocalDate.parse(checkInDate, formatter);
+        LocalDate checkOut = LocalDate.parse(checkOutDate, formatter);
+
+        comboBoxStartYear.setSelectedItem(checkIn.getYear());
+        comboBoxStartMonth.setSelectedItem(checkIn.getMonthValue());
+        comboBoxStartDay.setSelectedItem(checkIn.getDayOfMonth());
+
+        comboBoxEndYear.setSelectedItem(checkOut.getYear());
+        comboBoxEndMonth.setSelectedItem(checkOut.getMonthValue());
+        comboBoxEndDay.setSelectedItem(checkOut.getDayOfMonth());
+
+        calculateTotalPrice();
+    }
+
     private void makeReservation() {
         String customerName = textFieldCustomerName.getText();
         String customerNationality = textFieldCustomerNationality.getText();
@@ -286,8 +328,6 @@ public class MakeReservationView extends JFrame {
         clearReservationForm();
     }
 
-
-
     private void clearReservationForm() {
         textFieldCustomerName.setText("");
         textFieldCustomerNationality.setText("");
@@ -314,7 +354,6 @@ public class MakeReservationView extends JFrame {
         comboBoxRoomType.setSelectedIndex(0);
         comboBoxPensionType.setSelectedIndex(0);
         textAreaReservationNote.setText("");
-
     }
 
     private void calculateTotalPrice() {
