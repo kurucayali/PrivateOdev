@@ -293,7 +293,16 @@ public class MakeReservationView extends JFrame {
         String roomType = (String) comboBoxRoomType.getSelectedItem();
         String pensionType = (String) comboBoxPensionType.getSelectedItem();
         String reservationNote = textAreaReservationNote.getText();
-        double totalPrice = Double.parseDouble(labelTotalPrice.getText());
+        String totalPriceText = labelTotalPrice.getText();
+
+        // Gerekli alanları kontrol et
+        if (customerName.isEmpty() || customerNationality.isEmpty() || customerIdentityNum.isEmpty() || customerPhone.isEmpty() || customerEmail.isEmpty() ||
+                city.equals("Hepsi") || hotelName.equals("Hepsi") || roomType.equals("Hepsi") || pensionType.equals("Hepsi") || startDate.isEmpty() || endDate.isEmpty()) {
+            JOptionPane.showMessageDialog(panelMain, "Lütfen tüm gerekli bilgileri doldurun.", "Hata", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double totalPrice = Double.parseDouble(totalPriceText);
 
         // Room ID'yi almak için roomController kullanarak room ID'yi alıyoruz.
         int roomId = roomController.getRoomIdByDetails(hotelName, roomType, pensionType);

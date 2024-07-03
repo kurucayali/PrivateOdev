@@ -61,6 +61,7 @@ App sınıfını çalıştırarak uygulamayı başlatın.
 
 Kullanıcı adı ve şifre ile giriş yaparak sisteme erişim sağlayın.
 
+.....................................................................
 ### Admin girişi için:
 
 ##### Kullanıcı adı: admin
@@ -72,6 +73,52 @@ Kullanıcı adı ve şifre ile giriş yaparak sisteme erişim sağlayın.
 ##### Kullanıcı adı: ali
 
 ##### şifre: 123
+.....................................................................
+
+### Login Ekranı
+
+Bu ekranda admin girişi yapılırsa "Admin Paneli" açılır. 
+Employee rolünde bir kullanıcı ile giriş yapılırsa "Kullanıcı Paneli" açılır.
+
+
+### Admin Paneli
+
+Admin panelinde, kullanıcı ekle, güncelle ve sil işlemleri yapılır. 
+Ekranda kullanıcı listesi vardır. Liste role göre filtrelenebilir. 
+
+### Kullanıcı Paneli
+
+Geçiş ekranıdır. "Otel Yönetimi" , "Oda Yönetimi", "Rezervasyon Y önetimi"
+ve "Dönem Yönetimi" ekranalarına buradan geçiş yapılır. 
+
+### Otel Yönetim Paneli
+
+Ana ekranda tüm oteller listelenir. Otel adı ile otel araması yapılabilir. 
+Şehir bilgisi ile otel aramassı yapılabilir.
+Şehir bilgisi veya otelin sahip olduğu yıldız sayısına göre oteller listesi filtreleme yapılabilir. 
+Bu ekrandan sisteme yeni otel kaydı yapılır. 
+Listeden seçilen kayıt için güncelleme ve silme işlemi yapılabilir. 
+
+### Oda Yönetimi
+
+Burada sistemde olan tüm oda bilgileri listelenir. 
+Oda ekle, güncelle ve sil işlemleri yapılır. 
+
+### Rezervasyon Yönetimi 
+
+Rezervasyon yapma, arama güncelleme silme, oda fiyatlama işlemlerinin yapıldığı
+ekrandır. 
+
+### Dönem Yönetimi 
+
+Sistemede kayıtlı dönem bilgilerinin listelendiği, dönem ekle, güncelle ve sil 
+işlemlerinin yapıldığı ekrandır.
+
+
+
+
+
+
 
 
 
