@@ -162,18 +162,18 @@ public class ReservationDAO {
         }
     }
 
-    public List<Reservation> searchReservations(String customerName, String guestName, String guestIdentity) {
+    public List<Reservation> searchReservations(String customerName, String guestIdentity, String hotelName) {
         List<Reservation> reservations = new ArrayList<>();
         StringBuilder query = new StringBuilder("SELECT * FROM reservations WHERE 1=1");
 
         if (!customerName.isEmpty()) {
             query.append(" AND customer_name ILIKE ?");
         }
-        if (!guestName.isEmpty()) {
-            query.append(" AND guest_name ILIKE ?");
-        }
         if (!guestIdentity.isEmpty()) {
-            query.append(" AND guest_identity ILIKE ?");
+            query.append(" AND customer_identity_num ILIKE ?");
+        }
+        if (!hotelName.isEmpty()) {
+            query.append(" AND hotel_name ILIKE ?");
         }
 
         try (PreparedStatement statement = connection.prepareStatement(query.toString())) {
@@ -181,11 +181,11 @@ public class ReservationDAO {
             if (!customerName.isEmpty()) {
                 statement.setString(paramIndex++, "%" + customerName + "%");
             }
-            if (!guestName.isEmpty()) {
-                statement.setString(paramIndex++, "%" + guestName + "%");
-            }
             if (!guestIdentity.isEmpty()) {
                 statement.setString(paramIndex++, "%" + guestIdentity + "%");
+            }
+            if (!hotelName.isEmpty()) {
+                statement.setString(paramIndex++, "%" + hotelName + "%");
             }
 
             ResultSet resultSet = statement.executeQuery();
@@ -221,4 +221,6 @@ public class ReservationDAO {
         }
         return reservations;
     }
+
+
 }

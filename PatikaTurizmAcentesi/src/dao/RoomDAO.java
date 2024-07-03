@@ -1,12 +1,11 @@
 package dao;
 
 import model.Room;
+import service.Helper;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RoomDAO {
     private Connection connection;
@@ -26,7 +25,7 @@ public class RoomDAO {
             preparedStatement.setDouble(5, room.getPricePerNightAdult());
             preparedStatement.setDouble(6, room.getPricePerNightChild());
             preparedStatement.setInt(7, room.getStock());
-            preparedStatement.setString(8, convertMapToJson(room.getFeatures()));
+            preparedStatement.setString(8, Helper.convertMapToJson(room.getFeatures()));
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -51,7 +50,7 @@ public class RoomDAO {
                 room.setPricePerNightAdult(resultSet.getDouble("price_per_night_adult"));
                 room.setPricePerNightChild(resultSet.getDouble("price_per_night_child"));
                 room.setStock(resultSet.getInt("stock"));
-                room.setFeatures(convertJsonToMap(resultSet.getString("features")));
+                room.setFeatures(Helper.convertJsonToMap(resultSet.getString("features")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,7 +75,7 @@ public class RoomDAO {
                 room.setPricePerNightAdult(resultSet.getDouble("price_per_night_adult"));
                 room.setPricePerNightChild(resultSet.getDouble("price_per_night_child"));
                 room.setStock(resultSet.getInt("stock"));
-                room.setFeatures(convertJsonToMap(resultSet.getString("features")));
+                room.setFeatures(Helper.convertJsonToMap(resultSet.getString("features")));
 
                 rooms.add(room);
             }
@@ -98,7 +97,7 @@ public class RoomDAO {
             preparedStatement.setDouble(5, room.getPricePerNightAdult());
             preparedStatement.setDouble(6, room.getPricePerNightChild());
             preparedStatement.setInt(7, room.getStock());
-            preparedStatement.setString(8, convertMapToJson(room.getFeatures()));
+            preparedStatement.setString(8, Helper.convertMapToJson(room.getFeatures()));
             preparedStatement.setInt(9, room.getId());
 
             preparedStatement.executeUpdate();
@@ -135,7 +134,7 @@ public class RoomDAO {
                 room.setPricePerNightAdult(resultSet.getDouble("price_per_night_adult"));
                 room.setPricePerNightChild(resultSet.getDouble("price_per_night_child"));
                 room.setStock(resultSet.getInt("stock"));
-                room.setFeatures(convertJsonToMap(resultSet.getString("features")));
+                room.setFeatures(Helper.convertJsonToMap(resultSet.getString("features")));
 
                 rooms.add(room);
             }
@@ -148,7 +147,7 @@ public class RoomDAO {
 
     public List<Room> filterRooms(String hotelName, String city, String roomType) {
         List<Room> rooms = new ArrayList<>();
-        StringBuilder query = new StringBuilder("SELECT r.* FROM rooms r JOIN hotels h ON r.hotel_id = h.id WHERE 1=1");
+        StringBuilder query = new StringBuilder("SELECT r.*, h.name AS hotel_name, p.type AS pension_type FROM rooms r JOIN hotels h ON r.hotel_id = h.id JOIN pension_types p ON r.pension_type_id = p.id WHERE 1=1");
 
         if (!hotelName.isEmpty()) {
             query.append(" AND h.name = ?");
@@ -183,7 +182,9 @@ public class RoomDAO {
                 room.setPricePerNightAdult(resultSet.getDouble("price_per_night_adult"));
                 room.setPricePerNightChild(resultSet.getDouble("price_per_night_child"));
                 room.setStock(resultSet.getInt("stock"));
-                room.setFeatures(convertJsonToMap(resultSet.getString("features")));
+                room.setHotelName(resultSet.getString("hotel_name"));
+                room.setPensionType(resultSet.getString("pension_type"));
+                room.setFeatures(Helper.convertJsonToMap(resultSet.getString("features")));
 
                 rooms.add(room);
             }
@@ -194,9 +195,48 @@ public class RoomDAO {
         return rooms;
     }
 
-    public List<Room> listAvailableRooms(String city, String hotelName, int adultCount, int childCount) {
-        // Implement availability checking and filtering logic
-        return new ArrayList<>();
+    public List<Room> listAvailableRooms(String city, String hotelName) {
+        List<Room> rooms = new ArrayList<>();
+        StringBuilder query = new StringBuilder("SELECT r.*, h.name AS hotel_name, p.type AS pension_type FROM rooms r JOIN hotels h ON r.hotel_id = h.id JOIN pension_types p ON r.pension_type_id = p.id WHERE 1=1");
+
+        if (!city.equals("Hepsi") && !city.isEmpty()) {
+            query.append(" AND h.city = ?");
+        }
+        if (!hotelName.equals("Hepsi") && !hotelName.isEmpty()) {
+            query.append(" AND h.name = ?");
+        }
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query.toString())) {
+            int parameterIndex = 1;
+            if (!city.equals("Hepsi") && !city.isEmpty()) {
+                preparedStatement.setString(parameterIndex++, city);
+            }
+            if (!hotelName.equals("Hepsi") && !hotelName.isEmpty()) {
+                preparedStatement.setString(parameterIndex++, hotelName);
+            }
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Room room = new Room();
+                room.setId(resultSet.getInt("id"));
+                room.setHotelId(resultSet.getInt("hotel_id"));
+                room.setSeasonId(resultSet.getInt("season_id"));
+                room.setPensionTypeId(resultSet.getInt("pension_type_id"));
+                room.setRoomType(resultSet.getString("room_type"));
+                room.setPricePerNightAdult(resultSet.getDouble("price_per_night_adult"));
+                room.setPricePerNightChild(resultSet.getDouble("price_per_night_child"));
+                room.setStock(resultSet.getInt("stock"));
+                room.setHotelName(resultSet.getString("hotel_name"));
+                room.setPensionType(resultSet.getString("pension_type"));
+                room.setFeatures(Helper.convertJsonToMap(resultSet.getString("features")));
+
+                rooms.add(room);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rooms;
     }
 
     public List<String> getCities() {
@@ -232,51 +272,75 @@ public class RoomDAO {
         return hotels;
     }
 
-    private String convertMapToJson(Map<String, Object> map) {
-        StringBuilder json = new StringBuilder("{");
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (json.length() > 1) {
-                json.append(",");
+    public List<String> getRoomTypesByHotel(String hotelName) {
+        List<String> roomTypes = new ArrayList<>();
+        String query = "SELECT DISTINCT room_type FROM rooms r JOIN hotels h ON r.hotel_id = h.id WHERE h.name = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, hotelName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                roomTypes.add(resultSet.getString("room_type"));
             }
-            json.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        json.append("}");
-        return json.toString();
+
+        return roomTypes;
     }
 
-    private Map<String, Object> convertJsonToMap(String json) {
-        Map<String, Object> map = new HashMap<>();
-        json = json.replace("{", "").replace("}", "");
-        String[] pairs = json.split(",");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":");
-            if (keyValue.length == 2) {
-                String key = keyValue[0].replace("\"", "").trim();
-                String value = keyValue[1].replace("\"", "").trim();
-                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-                    map.put(key, Boolean.parseBoolean(value));
-                } else {
-                    map.put(key, value);
-                }
+    public List<String> getPensionTypesByHotel(String hotelName) {
+        List<String> pensionTypes = new ArrayList<>();
+        String query = "SELECT DISTINCT p.type FROM rooms r JOIN hotels h ON r.hotel_id = h.id JOIN pension_types p ON r.pension_type_id = p.id WHERE h.name = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, hotelName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                pensionTypes.add(resultSet.getString("type"));
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return map;
+
+        return pensionTypes;
     }
 
-    public double getPricePerNight(String hotelName, String roomType, String pensionType) {
-        String query = "SELECT price_per_night FROM rooms WHERE hotel_name = ? AND room_type = ? AND pension_type = ?";
+    public int getRoomIdByDetails(String hotelName, String roomType, String pensionType) {
+        String query = "SELECT r.id FROM rooms r " +
+                "JOIN hotels h ON r.hotel_id = h.id " +
+                "JOIN pension_types p ON r.pension_type_id = p.id " +
+                "WHERE h.name = ? AND r.room_type = ? AND p.type = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, hotelName);
             preparedStatement.setString(2, roomType);
             preparedStatement.setString(3, pensionType);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return resultSet.getDouble("price_per_night");
+                return resultSet.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public double getPricePerNight(String hotelName, String roomType, String pensionType) {
+        String query = "SELECT price_per_night_adult FROM rooms r " +
+                "JOIN hotels h ON r.hotel_id = h.id " +
+                "JOIN pension_types p ON r.pension_type_id = p.id " +
+                "WHERE h.name = ? AND r.room_type = ? AND p.type = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, hotelName);
+            preparedStatement.setString(2, roomType);
+            preparedStatement.setString(3, pensionType);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getDouble("price_per_night_adult");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0.0;
     }
-
 }

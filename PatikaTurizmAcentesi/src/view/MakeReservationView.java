@@ -39,10 +39,10 @@ public class MakeReservationView extends JFrame {
     private JComboBox<String> comboBoxRoomType;
     private JComboBox<String> comboBoxPensionType;
     private JTextArea textAreaReservationNote;
-    private JTextField textFieldTotalPrice;
     private JButton buttonMakeReservation;
     private JPanel panelMakeReservation;
     private JButton buttonExit;
+    private JLabel labelTotalPrice;
 
     private ReservationController reservationController;
     private HotelController hotelController;
@@ -65,8 +65,6 @@ public class MakeReservationView extends JFrame {
 
     private void initComponents() {
         loadCities();
-        loadRoomTypes();
-        loadPensionTypes();
         loadDateValues();
     }
 
@@ -91,6 +89,16 @@ public class MakeReservationView extends JFrame {
                 loadHotels();
             }
         });
+
+        comboBoxHotelName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadRoomTypes();
+                loadPensionTypes();
+                calculateTotalPrice();
+            }
+        });
+
         comboBoxStartDay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -133,13 +141,6 @@ public class MakeReservationView extends JFrame {
             }
         });
 
-        comboBoxHotelName.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calculateTotalPrice();
-            }
-        });
-
         comboBoxRoomType.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -174,24 +175,33 @@ public class MakeReservationView extends JFrame {
     }
 
     private void loadRoomTypes() {
-        comboBoxRoomType.removeAllItems();
-        comboBoxRoomType.addItem("Hepsi");
-        comboBoxRoomType.addItem("Single room");
-        comboBoxRoomType.addItem("Double room");
-        comboBoxRoomType.addItem("Junior suite room");
-        comboBoxRoomType.addItem("Suite room");
+        String selectedHotel = (String) comboBoxHotelName.getSelectedItem();
+        if (selectedHotel != null && !selectedHotel.equals("Hepsi")) {
+            List<String> roomTypes = roomController.getRoomTypesByHotel(selectedHotel);
+            comboBoxRoomType.removeAllItems();
+            comboBoxRoomType.addItem("Hepsi");
+            for (String roomType : roomTypes) {
+                comboBoxRoomType.addItem(roomType);
+            }
+        } else {
+            comboBoxRoomType.removeAllItems();
+            comboBoxRoomType.addItem("Hepsi");
+        }
     }
 
     private void loadPensionTypes() {
-        comboBoxPensionType.removeAllItems();
-        comboBoxPensionType.addItem("Hepsi");
-        comboBoxPensionType.addItem("Ultra Her şey Dahil");
-        comboBoxPensionType.addItem("Her şey Dahil");
-        comboBoxPensionType.addItem("Oda Kahvaltı");
-        comboBoxPensionType.addItem("Tam Pansiyon");
-        comboBoxPensionType.addItem("Yarım Pansiyon");
-        comboBoxPensionType.addItem("Sadece Yatak");
-        comboBoxPensionType.addItem("Alkol Hariç Full credit");
+        String selectedHotel = (String) comboBoxHotelName.getSelectedItem();
+        if (selectedHotel != null && !selectedHotel.equals("Hepsi")) {
+            List<String> pensionTypes = roomController.getPensionTypesByHotel(selectedHotel);
+            comboBoxPensionType.removeAllItems();
+            comboBoxPensionType.addItem("Hepsi");
+            for (String pensionType : pensionTypes) {
+                comboBoxPensionType.addItem(pensionType);
+            }
+        } else {
+            comboBoxPensionType.removeAllItems();
+            comboBoxPensionType.addItem("Hepsi");
+        }
     }
 
     private void loadDateValues() {
@@ -241,7 +251,10 @@ public class MakeReservationView extends JFrame {
         String roomType = (String) comboBoxRoomType.getSelectedItem();
         String pensionType = (String) comboBoxPensionType.getSelectedItem();
         String reservationNote = textAreaReservationNote.getText();
-        double totalPrice = Double.parseDouble(textFieldTotalPrice.getText());
+        double totalPrice = Double.parseDouble(labelTotalPrice.getText());
+
+        // Room ID'yi almak için roomController kullanarak room ID'yi alıyoruz.
+        int roomId = roomController.getRoomIdByDetails(hotelName, roomType, pensionType);
 
         Reservation reservation = new Reservation();
         reservation.setCustomerName(customerName);
@@ -261,6 +274,9 @@ public class MakeReservationView extends JFrame {
         reservation.setStartDate(Date.valueOf(startDate));
         reservation.setEndDate(Date.valueOf(endDate));
         reservation.setHotelName(hotelName);
+        reservation.setRoomId(roomId);
+        reservation.setRoomType(roomType);       // Yeni alan
+        reservation.setPensionType(pensionType); // Yeni alan
         reservation.setTotalPrice(totalPrice);
         reservation.setReservationNote(reservationNote);
 
@@ -269,6 +285,8 @@ public class MakeReservationView extends JFrame {
         JOptionPane.showMessageDialog(panelMain, "Rezervasyon başarıyla yapıldı!");
         clearReservationForm();
     }
+
+
 
     private void clearReservationForm() {
         textFieldCustomerName.setText("");
@@ -296,8 +314,9 @@ public class MakeReservationView extends JFrame {
         comboBoxRoomType.setSelectedIndex(0);
         comboBoxPensionType.setSelectedIndex(0);
         textAreaReservationNote.setText("");
-        textFieldTotalPrice.setText("");
+
     }
+
     private void calculateTotalPrice() {
         int startDay = (int) comboBoxStartDay.getSelectedItem();
         int startMonth = (int) comboBoxStartMonth.getSelectedItem();
@@ -320,7 +339,6 @@ public class MakeReservationView extends JFrame {
         double pricePerNight = roomController.getPricePerNight(selectedHotel, selectedRoomType, selectedPensionType);
         double totalPrice = pricePerNight * nights;
 
-        textFieldTotalPrice.setText(String.valueOf(totalPrice));
+        labelTotalPrice.setText(String.valueOf(totalPrice));
     }
-
 }

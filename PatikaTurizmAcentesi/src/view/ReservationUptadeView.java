@@ -2,12 +2,14 @@ package view;
 
 import controller.ReservationController;
 import controller.HotelController;
+import controller.RoomController;
 import model.Reservation;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class ReservationUptadeView extends JFrame {
@@ -38,27 +40,122 @@ public class ReservationUptadeView extends JFrame {
     private JComboBox<String> comboBoxHotelName;
     private JComboBox<String> comboBoxRoomType;
     private JComboBox<String> comboBoxPensionType;
-    private JTextField textFieldTotalPrice;
+    private JLabel labelTotalPrice;
     private JTextArea textAreaReservationNote;
     private JButton buttonSave;
     private JButton buttonCancel;
 
     private ReservationController reservationController;
     private HotelController hotelController;
+    private RoomController roomController;
     private Reservation reservation;
 
-    public ReservationUptadeView(ReservationController reservationController, HotelController hotelController, Reservation reservation, Runnable onReservationUpdatedCallback) {
+    public ReservationUptadeView(ReservationController reservationController, HotelController hotelController, RoomController roomController, Reservation reservation, Runnable onReservationUpdatedCallback) {
         this.reservationController = reservationController;
         this.hotelController = hotelController;
+        this.roomController = roomController;
         this.reservation = reservation;
 
         setTitle("Rezervasyon Güncelle");
-        setSize(400, 600);
+        setSize(1500, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         add(panelMain);
 
-        // ComboBoxları doldur
+        initComboBoxes();
+        loadCities();
+        loadReservationDetails();
+
+        comboBoxCityName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedCity = (String) comboBoxCityName.getSelectedItem();
+                loadHotels(selectedCity);
+            }
+        });
+
+        comboBoxHotelName.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadRoomAndPensionTypes();
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxRoomType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxPensionType.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxStartDay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxStartMonth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxStartYear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndDay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndMonth.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        comboBoxEndYear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateTotalPrice();
+            }
+        });
+
+        buttonSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateReservation();
+                onReservationUpdatedCallback.run();
+                dispose();
+            }
+        });
+
+        buttonCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+    }
+
+    private void initComboBoxes() {
         for (int i = 1; i <= 31; i++) {
             comboBoxStartDay.addItem(i);
             comboBoxEndDay.addItem(i);
@@ -71,39 +168,6 @@ public class ReservationUptadeView extends JFrame {
             comboBoxStartYear.addItem(i);
             comboBoxEndYear.addItem(i);
         }
-
-        // Şehir bilgilerini yükle
-        loadCities();
-
-        // Mevcut rezervasyon bilgilerini doldur
-        loadReservationDetails();
-
-        // Şehir seçimi değiştiğinde otel isimlerini güncelle
-        comboBoxCityName.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selectedCity = (String) comboBoxCityName.getSelectedItem();
-                loadHotels(selectedCity);
-            }
-        });
-
-        // Kaydet butonu olayı
-        buttonSave.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateReservation();
-                onReservationUpdatedCallback.run();
-                dispose();
-            }
-        });
-
-        // İptal butonu olayı
-        buttonCancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
     }
 
     private void loadCities() {
@@ -118,6 +182,23 @@ public class ReservationUptadeView extends JFrame {
         List<String> hotels = hotelController.getHotelsByCity(city);
         for (String hotel : hotels) {
             comboBoxHotelName.addItem(hotel);
+        }
+    }
+
+    private void loadRoomAndPensionTypes() {
+        String selectedHotel = (String) comboBoxHotelName.getSelectedItem();
+        if (selectedHotel != null) {
+            comboBoxRoomType.removeAllItems();
+            List<String> roomTypes = roomController.getRoomTypesByHotel(selectedHotel);
+            for (String roomType : roomTypes) {
+                comboBoxRoomType.addItem(roomType);
+            }
+
+            comboBoxPensionType.removeAllItems();
+            List<String> pensionTypes = roomController.getPensionTypesByHotel(selectedHotel);
+            for (String pensionType : pensionTypes) {
+                comboBoxPensionType.addItem(pensionType);
+            }
         }
     }
 
@@ -152,10 +233,35 @@ public class ReservationUptadeView extends JFrame {
         comboBoxCityName.setSelectedItem(city);
         loadHotels(city);
         comboBoxHotelName.setSelectedItem(reservation.getHotelName());
+        loadRoomAndPensionTypes();
         comboBoxRoomType.setSelectedItem(reservation.getRoomType());
         comboBoxPensionType.setSelectedItem(reservation.getPensionType());
         textAreaReservationNote.setText(reservation.getReservationNote());
-        textFieldTotalPrice.setText(String.valueOf(reservation.getTotalPrice()));
+        calculateTotalPrice();
+    }
+
+    private void calculateTotalPrice() {
+        int startDay = (int) comboBoxStartDay.getSelectedItem();
+        int startMonth = (int) comboBoxStartMonth.getSelectedItem();
+        int startYear = (int) comboBoxStartYear.getSelectedItem();
+        LocalDate startDate = LocalDate.of(startYear, startMonth, startDay);
+
+        int endDay = (int) comboBoxEndDay.getSelectedItem();
+        int endMonth = (int) comboBoxEndMonth.getSelectedItem();
+        int endYear = (int) comboBoxEndYear.getSelectedItem();
+        LocalDate endDate = LocalDate.of(endYear, endMonth, endDay);
+
+        long nights = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+
+        String selectedHotel = (String) comboBoxHotelName.getSelectedItem();
+        String selectedRoomType = (String) comboBoxRoomType.getSelectedItem();
+        String selectedPensionType = (String) comboBoxPensionType.getSelectedItem();
+
+        if (selectedHotel != null && selectedRoomType != null && selectedPensionType != null) {
+            double pricePerNight = roomController.getPricePerNight(selectedHotel, selectedRoomType, selectedPensionType);
+            double totalPrice = pricePerNight * nights;
+            labelTotalPrice.setText(String.valueOf(totalPrice));
+        }
     }
 
     private void updateReservation() {
@@ -190,7 +296,7 @@ public class ReservationUptadeView extends JFrame {
         reservation.setRoomType((String) comboBoxRoomType.getSelectedItem());
         reservation.setPensionType((String) comboBoxPensionType.getSelectedItem());
         reservation.setReservationNote(textAreaReservationNote.getText());
-        reservation.setTotalPrice(Double.parseDouble(textFieldTotalPrice.getText()));
+        reservation.setTotalPrice(Double.parseDouble(labelTotalPrice.getText()));
 
         reservationController.updateReservation(reservation);
         JOptionPane.showMessageDialog(panelMain, "Rezervasyon başarıyla güncellendi!");

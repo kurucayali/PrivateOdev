@@ -40,8 +40,8 @@ public class RoomController {
         return roomService.filterRooms(hotelName, city, roomType);
     }
 
-    public List<Room> listAvailableRooms(String city, String hotelName, int adultCount, int childCount) {
-        return roomService.listAvailableRooms(city, hotelName, adultCount, childCount);
+    public List<Room> listAvailableRooms(String city, String hotelName) {
+        return roomService.listAvailableRooms(city, hotelName);
     }
 
     public List<String> getCities() {
@@ -51,8 +51,21 @@ public class RoomController {
     public List<String> getHotelsByCity(String city) {
         return roomService.getHotelsByCity(city);
     }
+
     public double getPricePerNight(String hotelName, String roomType, String pensionType) {
         return roomService.getPricePerNight(hotelName, roomType, pensionType);
+    }
+
+    public List<String> getRoomTypesByHotel(String hotelName) {
+        return roomService.getRoomTypesByHotel(hotelName);
+    }
+
+    public List<String> getPensionTypesByHotel(String hotelName) {
+        return roomService.getPensionTypesByHotel(hotelName);
+    }
+
+    public int getRoomIdByDetails(String hotelName, String roomType, String pensionType) {
+        return roomService.getRoomIdByDetails(hotelName, roomType, pensionType);
     }
 
 }

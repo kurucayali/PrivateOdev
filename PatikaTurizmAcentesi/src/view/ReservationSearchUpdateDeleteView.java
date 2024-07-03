@@ -2,6 +2,7 @@ package view;
 
 import controller.ReservationController;
 import controller.HotelController;
+import controller.RoomController;
 import model.Reservation;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
     private JTextField textFieldCustomerIdentity;
     private JTextField textFieldHotelName;
     private JButton buttonFilter;
+    private JButton buttonLoadAll;
     private JTable tableReservations;
     private JButton buttonUpdate;
     private JButton buttonDelete;
@@ -24,11 +26,13 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
 
     private ReservationController reservationController;
     private HotelController hotelController;
+    private RoomController roomController;
     private DefaultTableModel tableModelReservations;
 
-    public ReservationSearchUpdateDeleteView(ReservationController reservationController, HotelController hotelController) {
+    public ReservationSearchUpdateDeleteView(ReservationController reservationController, HotelController hotelController, RoomController roomController) {
         this.reservationController = reservationController;
         this.hotelController = hotelController;
+        this.roomController = roomController;
 
         setTitle("Rezervasyon Arama/Güncelleme/Silme");
         setSize(800, 600);
@@ -38,6 +42,9 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
 
         initTableModel();
         initEventHandlers();
+
+        // İlk açılışta rezervasyonları yükle
+        loadAllReservations();
     }
 
     private void initTableModel() {
@@ -78,12 +85,24 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
                 dispose();
             }
         });
+
+        buttonLoadAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadAllReservations();
+            }
+        });
+    }
+
+    private void loadAllReservations() {
+        List<Reservation> reservations = reservationController.getAllReservations();
+        updateReservationsTable(reservations);
     }
 
     private void filterReservations() {
-        String customerName = textFieldCustomerName.getText();
-        String customerIdentity = textFieldCustomerIdentity.getText();
-        String hotelName = textFieldHotelName.getText();
+        String customerName = textFieldCustomerName.getText().trim();
+        String customerIdentity = textFieldCustomerIdentity.getText().trim();
+        String hotelName = textFieldHotelName.getText().trim();
 
         List<Reservation> reservations = reservationController.searchReservations(customerName, customerIdentity, hotelName);
         updateReservationsTable(reservations);
@@ -108,7 +127,7 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
         if (selectedRow != -1) {
             int reservationId = (int) tableReservations.getValueAt(selectedRow, 0);
             Reservation reservation = reservationController.getReservation(reservationId);
-            new ReservationUptadeView(reservationController, hotelController, reservation, new Runnable() {
+            new ReservationUptadeView(reservationController, hotelController, roomController, reservation, new Runnable() {
                 @Override
                 public void run() {
                     filterReservations();
@@ -123,9 +142,19 @@ public class ReservationSearchUpdateDeleteView extends JFrame {
         int selectedRow = tableReservations.getSelectedRow();
         if (selectedRow != -1) {
             int reservationId = (int) tableReservations.getValueAt(selectedRow, 0);
-            reservationController.deleteReservation(reservationId);
-            filterReservations();
-            JOptionPane.showMessageDialog(panelMain, "Rezervasyon başarıyla silindi!");
+
+            // Kullanıcıya emin olup olmadığını soran bir onay penceresi göster
+            int response = JOptionPane.showConfirmDialog(panelMain,
+                    "Bu rezervasyonu silmek istediğinizden emin misiniz?",
+                    "Onay",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (response == JOptionPane.YES_OPTION) {
+                reservationController.deleteReservation(reservationId);
+                filterReservations();
+                JOptionPane.showMessageDialog(panelMain, "Rezervasyon başarıyla silindi!");
+            }
         } else {
             JOptionPane.showMessageDialog(panelMain, "Lütfen silmek istediğiniz rezervasyonu seçin.");
         }

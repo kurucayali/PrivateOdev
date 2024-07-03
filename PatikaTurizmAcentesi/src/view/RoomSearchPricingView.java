@@ -1,6 +1,8 @@
 package view;
 
 import controller.RoomController;
+import controller.HotelController;
+import controller.ReservationController;
 import model.Room;
 
 import javax.swing.*;
@@ -9,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.List;
 
 public class RoomSearchPricingView extends JFrame {
@@ -22,20 +23,23 @@ public class RoomSearchPricingView extends JFrame {
     private JComboBox<Integer> comboBoxCheckOutYear;
     private JComboBox<String> comboBoxSearchCity;
     private JComboBox<String> comboBoxSearchHotelName;
-    private JTextField textFieldAdultCount;
-    private JTextField textFieldChildCount;
     private JTable tableRooms;
     private JButton buttonListRooms;
+    private JButton buttonMakeReservation;
     private JButton buttonExit;
     private DefaultTableModel tableModelRooms;
 
     private RoomController roomController;
+    private HotelController hotelController;
+    private ReservationController reservationController;
 
-    public RoomSearchPricingView(RoomController roomController) {
+    public RoomSearchPricingView(RoomController roomController, HotelController hotelController, ReservationController reservationController) {
         this.roomController = roomController;
+        this.hotelController = hotelController;
+        this.reservationController = reservationController;
 
         setTitle("Oda Arama ve Fiyatlandırma");
-        setSize(800, 600);
+        setSize(1200, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         add(panelMain);
@@ -45,20 +49,6 @@ public class RoomSearchPricingView extends JFrame {
     }
 
     private void initComponents() {
-        comboBoxSearchCity = new JComboBox<>();
-        comboBoxSearchHotelName = new JComboBox<>();
-        comboBoxCheckInDay = new JComboBox<>();
-        comboBoxCheckInMonth = new JComboBox<>();
-        comboBoxCheckInYear = new JComboBox<>();
-        comboBoxCheckOutDay = new JComboBox<>();
-        comboBoxCheckOutMonth = new JComboBox<>();
-        comboBoxCheckOutYear = new JComboBox<>();
-        textFieldAdultCount = new JTextField();
-        textFieldChildCount = new JTextField();
-        tableRooms = new JTable();
-        buttonListRooms = new JButton("Listele");
-        buttonExit = new JButton("Çıkış");
-
         loadCities();
         initDateComboBoxes();
 
@@ -131,28 +121,25 @@ public class RoomSearchPricingView extends JFrame {
     private void listRooms() {
         String city = (String) comboBoxSearchCity.getSelectedItem();
         String hotelName = (String) comboBoxSearchHotelName.getSelectedItem();
-        int adultCount = Integer.parseInt(textFieldAdultCount.getText());
-        int childCount = Integer.parseInt(textFieldChildCount.getText());
 
-        List<Room> rooms = roomController.listAvailableRooms(city, hotelName, adultCount, childCount);
+        List<Room> rooms = roomController.listAvailableRooms(city, hotelName);
         updateRoomsTable(rooms);
     }
 
     private void updateRoomsTable(List<Room> rooms) {
-        int adultCount = Integer.parseInt(textFieldAdultCount.getText());
-        int childCount = Integer.parseInt(textFieldChildCount.getText());
         String checkInDate = comboBoxCheckInYear.getSelectedItem() + "-" + comboBoxCheckInMonth.getSelectedItem() + "-" + comboBoxCheckInDay.getSelectedItem();
         String checkOutDate = comboBoxCheckOutYear.getSelectedItem() + "-" + comboBoxCheckOutMonth.getSelectedItem() + "-" + comboBoxCheckOutDay.getSelectedItem();
         int nights = getNightsDifference(checkInDate, checkOutDate);
 
         tableModelRooms.setRowCount(0);
         for (Room room : rooms) {
+            double totalPrice = room.getTotalPrice(nights); // Toplam fiyat hesaplama
             tableModelRooms.addRow(new Object[]{
                     room.getHotelName(),
                     room.getRoomType(),
                     room.getPensionType(),
                     room.getPricePerNight(),
-                    room.getTotalPrice(adultCount, childCount, nights)
+                    totalPrice
             });
         }
     }

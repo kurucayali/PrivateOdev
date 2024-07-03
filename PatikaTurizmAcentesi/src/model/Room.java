@@ -123,7 +123,8 @@ public class Room {
         return pricePerNightAdult; // Bu metot ihtiyaca göre özelleştirilebilir
     }
 
-    public double getTotalPrice(int adultCount, int childCount, int nights) {
-        return (adultCount * pricePerNightAdult + childCount * pricePerNightChild) * nights;
+    public double getTotalPrice(int nights) {
+        // Varsayılan olarak tek bir gece fiyatı ve gece sayısını kullanarak hesaplama yapar
+        return getPricePerNight() * nights;
     }
 }

@@ -3,22 +3,10 @@ package view;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import controller.HotelController;
-import controller.RoomController;
-import controller.SeasonController;
-import controller.UserController;
-import controller.ReservationController;
-import dao.RoomDAO;
-import dao.UserDAO;
-import dao.HotelDAO;
-import dao.SeasonDAO;
-import dao.ReservationDAO;
-import service.HotelService;
-import service.RoomService;
-import service.SeasonService;
-import service.UserService;
-import service.ReservationService;
+import controller.*;
+import dao.*;
 import db.DatabaseConnection;
+import service.*;
 
 public class EmployeeView extends JFrame {
     private JPanel panelMain;
